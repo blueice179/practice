@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>番茄钟计时器</title>
+  <style>
+    /* 1.页面样式初始化 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    ul,
+    ol {
+      list-style: none;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    input,
+    button {
+      outline: none;
+    }
+
+    /* 2.页面结构布局 */
+    .container {
+      width: 100%;
+      /* 用最小高度而非固定高度：内容放大撑高时页面可滚动，不会被裁剪 */
+      min-height: 100vh;
+      background-color: rgb(218, 218, 218);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: .625rem;
+      padding: 1.25rem;
+
+    }
+
+    .container .study-time-left,
+    .container .total-study-time,
+    .container .rest-time {
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-radius: 20px;
+
+      min-width: 0;
+    }
+
+    .container .total-study-time {
+      grid-row: 1;
+      grid-column: 2;
+    }
+
+    .container .total-study-time h2 {
+      font-size: 1.875rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .container .total-study-time .total-study-time-sum {
+      font-size: 2.5rem;
+      color: pink;
+      margin-bottom: 1.25rem
+    }
+
+    .container .total-study-time button {
+      border: none;
+      transition: all .3s ease-in-out;
+    }
+
+    .container .total-study-time button:hover {
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+
+    .container .total-study-time button svg {
+      width: 2.5rem;
+      height: auto;
+      display: block;
+    }
+
+    .container .study-time-left {
+      grid-row: 1/3;
+      grid-column: 1;
+      position: relative;
+    }
+
+    .container .study-time-left h2 {
+      font-size: 1.875rem;
+      margin-bottom: 1.25rem
+    }
+
+    .container .study-time-left .circle {
+      width: min(18.75rem, 100%);
+      aspect-ratio: 1;
+
+    }
+
+    .container .study-time-left .circle svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .container .study-time-left .circle svg .background {
+      fill: none;
+      stroke-width: 15;
+      stroke: rgb(165, 161, 161);
+      transform: rotate(-90deg);
+      transform-origin: center center;
+
+
+    }
+
+    .container .study-time-left .circle svg .progress {
+      fill: none;
+      stroke-width: 15;
+      stroke: rgb(223, 89, 12);
+      stroke-dasharray: 848.205;
+      /* 图形头部样式为圆形 */
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: center center;
+    }
+
+    .container .study-time-left .study-time-left-container {
+      width: 12.5rem;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .container .study-time-left .study-time-left-container input {
+      width: 100%;
+      border: none;
+      text-align: center;
+      font-size: 2.5rem;
+      color: black;
+    }
+
+    .container .study-time-left .study-time-left-btns button {
+      margin-top: 1.875rem;
+      margin-right: 1.875rem;
+      border: none;
+      transition: all .3s ease-in-out;
+
+    }
+
+    .container .study-time-left .study-time-left-btns .study-time-left-reset {
+      margin-right: 0;
+    }
+
+    .container .study-time-left .study-time-left-btns button:hover {
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+
+    .container .study-time-left .study-time-left-btns button svg {
+      width: 1.875rem;
+      height: auto;
+
+    }
+
+    .container .rest-time {
+      grid-row: 2;
+      grid-column: 2;
+    }
+
+    .container .rest-time h2 {
+      font-size: 1.875rem;
+      margin-bottom: 1.25rem
+    }
+
+    .container .rest-time .timing-bar {
+      width: 100%;
+
+    }
+
+    .container .rest-time .timing-bar .icon {
+      width: 100%;
+      max-width: 25rem;
+      margin: 0 auto;
+      height: .9375rem;
+      /* svg默认inline-block，会有基线对齐问题，造成上下空隙不一致，转换成block解决该问题 */
+      display: block;
+      margin-bottom: 1.25rem;
+    }
+
+    .container .rest-time .timing-bar .icon .background {
+      fill: none;
+      stroke-width: 15;
+      stroke: gray;
+      stroke-linecap: round;
+    }
+
+    .container .rest-time .timing-bar .icon .progress {
+      fill: none;
+      stroke-width: 15;
+      stroke: green;
+      stroke-linecap: round;
+      stroke-dasharray: 385;
+    }
+
+    .container .rest-time .rest-time-container input {
+      width: 100%;
+      min-width: 0;
+      border: none;
+      text-align: center;
+      font-size: 2.5rem;
+      color: black;
+      margin-bottom: 1.25rem;
+    }
+
+    .container .rest-time .rest-time-btns button {
+      border: none;
+      margin-right: 1.875rem;
+      transition: all .3s ease-in-out;
+
+    }
+
+    .container .rest-time .rest-time-btns .rest-time-reset {
+      margin-right: 0;
+    }
+
+    .container .rest-time .rest-time-btns button:hover {
+      transform: scale(1.2);
+      cursor: pointer;
+
+    }
+
+    .container .rest-time .rest-time-btns button svg {
+      width: 1.875rem;
+      height: auto;
+    }
+
+    @media screen and (max-width: 1024px) {
+      html {
+        font-size: 93.75%;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .total-study-time {
+        flex: 1;
+      }
+
+      .study-time-left {
+        flex: 2;
+      }
+
+      .rest-time {
+        flex: 1;
+      }
+
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="total-study-time">
+      <h2>🎓</h2>
+      <div class="total-study-time-sum"></div>
+      <div><button class="total-study-time-reset"><svg class="icon" viewBox="0 0 1024 1024" version="1.1"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M80.457143 629.028571c87.771429-14.628571 314.514286-58.514286 431.542857-248.685714l424.228571 234.057143c-124.342857 212.114286-277.942857 358.4-314.514285 394.971429L80.457143 629.028571z"
+              fill="#DFF0FE" />
+            <path
+              d="M512 394.971429l402.285714 226.742857c-117.028571 190.171429-248.685714 329.142857-299.885714 365.714285L117.028571 636.342857C219.428571 621.714286 402.285714 563.2 512 394.971429m-7.314286-36.571429C365.714286 607.085714 43.885714 621.714286 43.885714 621.714286L621.714286 1024S804.571429 863.085714 950.857143 607.085714L504.685714 358.4z"
+              fill="#4788C7" />
+            <path
+              d="M504.685714 387.657143l14.628572-21.942857c14.628571-21.942857 29.257143-36.571429 51.2-43.885715 7.314286-7.314286 21.942857-7.314286 29.257143-7.314285 14.628571 0 29.257143 7.314286 43.885714 14.628571l65.828571 36.571429 219.428572-336.457143c7.314286-14.628571 21.942857-21.942857 36.571428-21.942857 7.314286 0 14.628571 0 21.942857 7.314285 21.942857 7.314286 29.257143 36.571429 14.628572 51.2l-168.228572 365.714286 58.514286 36.571429c21.942857 7.314286 36.571429 29.257143 43.885714 51.2v7.314285c14.628571 21.942857 14.628571 51.2 0 80.457143l-7.314285 14.628572-424.228572-234.057143z"
+              fill="#98CCFD" />
+            <path
+              d="M965.485714 29.257143h14.628572c14.628571 7.314286 14.628571 21.942857 14.628571 36.571428l-160.914286 351.085715-14.628571 21.942857 21.942857 14.628571 51.2 29.257143c14.628571 7.314286 29.257143 21.942857 36.571429 43.885714v7.314286c7.314286 21.942857 7.314286 51.2-7.314286 73.142857v7.314286l-402.285714-219.428571 7.314285-7.314286c7.314286-14.628571 21.942857-29.257143 43.885715-36.571429 7.314286 0 21.942857-7.314286 29.257143-7.314285 14.628571 0 29.257143 0 36.571428 7.314285l51.2 29.257143 21.942857 14.628572 21.942857-29.257143L943.542857 43.885714c7.314286-14.628571 14.628571-14.628571 21.942857-14.628571m0-29.257143c-14.628571 0-36.571429 7.314286-43.885714 21.942857L709.485714 351.085714l-58.514285-29.257143c-14.628571-14.628571-29.257143-14.628571-51.2-14.628571-14.628571 0-21.942857 0-36.571429 7.314286-21.942857 7.314286-43.885714 21.942857-58.514286 43.885714l-14.628571 36.571429 446.171428 248.685714 14.628572-29.257143c14.628571-29.257143 14.628571-65.828571 7.314286-95.085714L950.857143 512c-7.314286-21.942857-29.257143-43.885714-51.2-51.2l-51.2-29.257143 160.914286-351.085714c14.628571-29.257143 0-58.514286-21.942858-73.142857 0-7.314286-7.314286-7.314286-21.942857-7.314286zM270.628571 760.685714l51.2 36.571429s51.2-36.571429 168.228572-175.542857c-117.028571 95.085714-219.428571 138.971429-219.428572 138.971428z m197.485715 131.657143l43.885714 29.257143s51.2-58.514286 124.342857-146.285714c-95.085714 80.457143-168.228571 117.028571-168.228571 117.028571z"
+              fill="#4788C7" />
+            <path
+              d="M80.457143 146.285714c-36.571429 0-65.828571 29.257143-65.828572 65.828572s29.257143 65.828571 65.828572 65.828571 65.828571-21.942857 65.828571-65.828571-29.257143-65.828571-65.828571-65.828572z"
+              fill="#DFF0FE" />
+            <path
+              d="M80.457143 160.914286c29.257143 0 51.2 21.942857 51.2 51.2s-21.942857 58.514286-51.2 58.514285-51.2-21.942857-51.2-58.514285 21.942857-51.2 51.2-51.2m0-29.257143C36.571429 131.657143 0 168.228571 0 212.114286S36.571429 292.571429 80.457143 292.571429s80.457143-36.571429 80.457143-80.457143-36.571429-80.457143-80.457143-80.457143z"
+              fill="#4788C7" />
+            <path
+              d="M212.845714 364.982857c-21.942857 0-43.885714 14.628571-43.885714 43.885714s14.628571 43.885714 43.885714 43.885715 43.885714-29.257143 43.885715-51.2-21.942857-36.571429-43.885715-36.571429z"
+              fill="#DFF0FE" />
+            <path
+              d="M212.845714 379.611429c14.628571 0 29.257143 14.628571 29.257143 29.257142s-14.628571 21.942857-29.257143 21.942858-21.942857-14.628571-21.942857-29.257143 7.314286-21.942857 21.942857-21.942857m0-29.257143c-29.257143 0-51.2 21.942857-51.2 51.2s21.942857 51.2 51.2 51.2 51.2-21.942857 51.2-51.2-21.942857-51.2-51.2-51.2zM870.4 724.114286c-43.885714 0-95.085714-36.571429-117.028571-65.828572-51.2 0-102.4-29.257143-117.028572-58.514285-58.514286-7.314286-95.085714-36.571429-117.028571-65.828572-65.828571-7.314286-87.771429-65.828571-87.771429-65.828571 0-7.314286 0-21.942857 7.314286-21.942857 7.314286-7.314286 21.942857 0 21.942857 7.314285 0 0 14.628571 43.885714 65.828571 43.885715 7.314286 0 14.628571 7.314286 14.628572 14.628571 14.628571 29.257143 51.2 51.2 95.085714 58.514286 14.628571-7.314286 21.942857 0 21.942857 0 7.314286 21.942857 51.2 51.2 102.4 51.2 7.314286 0 14.628571 0 14.628572 7.314285 7.314286 21.942857 51.2 51.2 87.771428 51.2 7.314286 0 14.628571 7.314286 14.628572 21.942858 14.628571 14.628571 0 21.942857-7.314286 21.942857z"
+              fill="#4788C7" />
+          </svg></button></div>
+    </div>
+    <div class="study-time-left">
+      <h2>🍅</h2>
+      <div class="circle"><svg viewBox="0 0 300 300">
+          <circle class="background" cx="150" cy="150" r="135" />
+          <circle class="progress" cx="150" cy="150" r="135" />
+        </svg>
+      </div>
+      <div class="study-time-left-container"><input type="text" value='25:00' class="study-time-left-input"></div>
+      <div class="study-time-left-btns">
+        <button class="study-time-left-pause"><svg class="icon" width="200px" height="200.00px" viewBox="0 0 1024 1024"
+            version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#e9892a"
+              d="M512 1024A512 512 0 1 1 512 0a512 512 0 0 1 0 1024zM320 320v384h128V320H320z m256 0v384h128V320H576z" />
+          </svg></button>
+        <button class="study-time-left-start"><svg class="icon" width="200px" height="200.00px" viewBox="0 0 1024 1024"
+            version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#e9892a"
+              d="M512 1024A512 512 0 1 1 512 0a512 512 0 0 1 0 1024zM383.232 287.616v448l384-223.104-384-224.896z" />
+          </svg></button>
+        <button class="study-time-left-reset"><svg class="icon" width="200px" height="200.00px" viewBox="0 0 1024 1024"
+            version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#e9892a" d="M512 1024A512 512 0 1 1 512 0a512 512 0 0 1 0 1024zM320 320v384h384V320H320z" />
+          </svg></button>
+      </div>
+    </div>
+    <div class="rest-time">
+      <h2>☕️</h2>
+      <div class="timing-bar">
+        <svg class="icon" viewBox="0 0 400 15" preserveAspectRatio="none">
+          <line class="background" x1="7.5" y1="7.5" x2="392.5" y2="7.5" />
+          <line class="progress" x1="7.5" y1="7.5" x2="392.5" y2="7.5" />
+        </svg>
+      </div>
+      <div class="rest-time-container"><input type="text" class="rest-time-input"></div>
+      <div class="rest-time-btns">
+        <button class="rest-time-pause"><svg class="icon" width="200px" height="200.00px" viewBox="0 0 1024 1024"
+            version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#0b8113"
+              d="M512 1024A512 512 0 1 1 512 0a512 512 0 0 1 0 1024zM320 320v384h128V320H320z m256 0v384h128V320H576z" />
+          </svg></button>
+        <button class="rest-time-start"><svg class="icon" width="200px" height="200.00px" viewBox="0 0 1024 1024"
+            version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#0b8113"
+              d="M512 1024A512 512 0 1 1 512 0a512 512 0 0 1 0 1024zM383.232 287.616v448l384-223.104-384-224.896z" />
+          </svg></button>
+        <button class="rest-time-reset"><svg class="icon" width="200px" height="200.00px" viewBox="0 0 1024 1024"
+            version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#0b8113" d="M512 1024A512 512 0 1 1 512 0a512 512 0 0 1 0 1024zM320 320v384h384V320H320z" />
+          </svg></button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 1.获取元素引用
+    // 1.1学习剩余时间模块
+    const studyTimeLeftInput = document.querySelector('.study-time-left-input');
+    const studyTimeLeftStart = document.querySelector('.study-time-left-start');
+    const studyTimeLeftPause = document.querySelector('.study-time-left-pause');
+    const studyTimeLeftReset = document.querySelector('.study-time-left-reset');
+    const circleProgress = document.querySelector('.circle .progress');
+    const lineProgress = document.querySelector('.timing-bar .progress');
+    // 1.2.总学习时长模块
+    const totalStudyTimeSum = document.querySelector('.total-study-time-sum');
+    const totalStudyTimeReset = document.querySelector('.total-study-time-reset');
+    // 1.3.休息时长模块
+    const restTimeLeftInput = document.querySelector('.rest-time-input');
+    const restTimeLeftStart = document.querySelector('.rest-time-start');
+    const restTimeLeftPause = document.querySelector('.rest-time-pause');
+    const restTimeLeftReset = document.querySelector('.rest-time-reset');
+
+    // 2.全局状态：剩余秒数、定时器句柄
+    // let totalTime = 1500             // 学习时间倒计时初始 25 分钟
+    // let timeremain = totalTime;
+    // let timer = null;                // 学习时间倒计时定时器句柄
+    let totalTimer = null;          // 总学习时间计时器句柄
+    let totalStudyTime = Number(localStorage.getItem('totalStudyTime')) || 0;  // 从 localStorage 恢复，没有则为 0
+    let restTimer = null;          // 休息时间倒计时定时器句柄
+    let restTime = 300;             // 休息时间倒计时初始 5 分钟
+    let restRemain = restTime;
+    let studyState = { timer: null, total: 1500, remain: 1500 }    //  控制器句柄归零，总时间初始值25分钟，剩余时间和总时间相等
+    let restState = { timer: null, total: 300, remain: 300 } //休息时间计时器句柄归零，总时间初始值5分钟，剩余时间和总时间相等
+    const circleLength = 2 * Math.PI * 135;  // 圆周长 = 2 * π * 半径 
+    const lineLength = 385; //直线长为总长度400减去两个端头各半径为7.5的半圆宽度
+    // 3. 公共工具部分 */
+    // 3.1秒 → "mm:ss" 字符串
+    function secToMin(sec) {
+      const h = Math.floor(sec / 60 / 60 % 24)
+      const m = Math.floor(sec / 60 % 60);
+      const s = sec % 60;
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+    // 3.2初始化显示
+    // 3.2.1学习剩余时间初始化显示
+    studyTimeLeftInput.value = secToMin(studyState.remain);
+    // 3.2.2休息剩余时间初始化显示
+    restTimeLeftInput.value = secToMin(restState.remain);
+    // 3.3用户编辑倒计时时间
+    function editTimeLeft(TT) {
+      const hLeft = +prompt('请输入倒计时小时数')
+      const minLeft = +prompt('请输入倒计时分钟数')
+      const secLeft = +prompt('请输入倒计时秒数')
+      if (hLeft > 24 || minLeft > 60 || secLeft > 59) {
+        alert('小时数请不要超过24，分钟数请不要超过59，秒数请不要超过59')
+        return TT;
+      } else if (hLeft <= 0 && minLeft <= 0 && secLeft <= 0) {
+        alert('请输入大于0的倒计时时间')
+        return TT;
+      }
+      return hLeft * 60 * 60 + minLeft * 60 + secLeft;
+    }
+    // 3.4.倒计时器
+    // 3.4.1学习时间倒计时器
+    function TimeLeft(state, input) {
+      if (state.timer) return;
+      // 已经归零时，点击开始先恢复到初始值再倒计时
+      if (state.remain <= 0) {
+        state.remain = state.total;
+        input.value = secToMin(state.remain);
+        // 学习倒计时进度条复位
+        updateCircleProgress(state.total, state.remain);
+      }
+      state.timer = setInterval(() => {
+        state.remain--;
+        input.value = secToMin(state.remain);
+        if (state.remain <= 0) {
+          clearInterval(state.timer);
+          state.timer = null;
+          // 学习时间倒计时结束，播放提示音
+          playChime();
+        }
+        // 嵌入学习时间进度条更新函数
+        updateCircleProgress(state.total, state.remain)
+      }, 1000);
+    }
+    // 3.4.2休息时间倒计时器
+    function restTimeLeft(state, input) {
+      if (state.timer) return;
+      // 已经归零时，点击开始先恢复到初始值再倒计时
+      if (state.remain <= 0) {
+        state.remain = state.total;
+        input.value = secToMin(state.remain);
+        // 休息时间进度条复位
+        updateRestLineProgress(state.total, state.remain);
+      }
+      state.timer = setInterval(() => {
+        state.remain--;
+        input.value = secToMin(state.remain);
+        if (state.remain <= 0) {
+          clearInterval(state.timer);
+          state.timer = null;
+          // 休息时间倒计时结束提示音 
+          playBeep();
+        }
+        // 嵌入休息时间倒计时进度条更新
+        updateRestLineProgress(state.total, state.remain)
+      }, 1000);
+    }
+
+    // 3.5.暂停倒计时器
+    function pause(state) {
+      clearInterval(state.timer);
+      state.timer = null;
+    }
+    // 3.6.重置倒计时器
+    function reset(state, input) {
+      clearInterval(state.timer);
+      state.timer = null;
+      state.remain = state.total;
+      input.value = secToMin(state.remain);
+    }
+    // 3.7用户输入倒计时时间
+    function update(state, input) {
+      state.total = editTimeLeft(state.total);
+      state.remain = state.total;
+      input.value = secToMin(state.remain);
+    }
+    // 3.8.学习时间进度条更新
+    function updateCircleProgress(total, remain) {
+      const progress = (total - remain) / total;
+      const progressLength = circleLength * progress;
+      circleProgress.style.strokeDashoffset = progressLength
+    }
+    // 3.9.休息时间进度条更新
+    function updateRestLineProgress(total, remain) {
+      const progress = (total - remain) / total;
+      const progressLength = progress * lineLength;
+      lineProgress.style.strokeDashoffset = progressLength;
+    }
+    // 3.10.五下beep提示音
+    function playBeep() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)(); // 自动播放策略下，定时器里创建的 context 需要手动 resume 
+      if (ctx.state === 'suspended') ctx.resume();
+
+      [0, 0.3, 0.6, 0.9, 1.2].forEach(t => {
+        const osc = ctx.createOscillator();
+        osc.frequency.value = 880; // 音高（Hz） 
+        osc.type = 'sine'; // 波形：sine 最柔和，square 最尖锐 
+        osc.connect(ctx.destination); // 连接到扬声器 
+        osc.start(ctx.currentTime + t);
+        osc.stop(ctx.currentTime + t + 0.15); // 每声持续 0.15s 
+      });
+    }
+    // 3.11.学习结束提示音
+    function playChime() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume();
+      // 单组模式：叮-咚-叮 
+      const pattern = [
+        { freq: 523.25, offset: 0, dur: 0.5 },
+        { freq: 261.63, offset: 0.35, dur: 0.5 },
+        { freq: 523.25, offset: 0.7, dur: 0.6 },
+      ];
+      const repeat = 2; // 重复几组（2 组 = 6 声） 
+      const groupGap = 0.2; // 两组之间的停顿 
+      const groupLength = 1.3; // 一组总时长 = 0.7 + 0.6 
+      // 展开成完整的音符序列 
+      const notes = [];
+      for (let r = 0; r < repeat; r++) {
+        const groupStart = r * (groupLength + groupGap);
+        pattern.forEach(n => {
+          notes.push({
+            freq: n.freq,
+            start: groupStart + n.offset,
+            dur: n.dur,
+          });
+        });
+      }
+
+      notes.forEach(n => {
+        // 主音 
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = n.freq;
+
+        // 高八度泛音，让声音更像钟声而不是纯电子音 
+        const overtone = ctx.createOscillator();
+        overtone.type = 'sine';
+        overtone.frequency.value = n.freq * 2;
+
+        // 主音音量包络：快速起音 + 指数衰减 
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, ctx.currentTime + n.start);
+        gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + n.start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n.start + n.dur);
+
+        // 泛音音量减半 
+        const overtoneGain = ctx.createGain();
+        overtoneGain.gain.setValueAtTime(0, ctx.currentTime + n.start);
+        overtoneGain.gain.linearRampToValueAtTime(0.09, ctx.currentTime + n.start + 0.01);
+        overtoneGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n.start + n.dur);
+
+        osc.connect(gain).connect(ctx.destination);
+        overtone.connect(overtoneGain).connect(ctx.destination);
+
+        osc.start(ctx.currentTime + n.start);
+        osc.stop(ctx.currentTime + n.start + n.dur);
+        overtone.start(ctx.currentTime + n.start);
+        overtone.stop(ctx.currentTime + n.start + n.dur);
+      });
+    }
+
+    // 4.学习剩余时间模块
+    // 4.1学习剩余时间开始倒计时
+    function startStudyTimeLeft() {
+      //  学习时间倒计时器开启
+      TimeLeft(studyState, studyTimeLeftInput)
+
+      // 嵌入总学习时长计时器开启
+      totalTimer = setInterval(TotalStudyTime, 1000)
+      // 嵌入休息时长计时器停止
+      pauseRestTimeLeft()
+
+    }
+    // 4.2.学习剩余时间暂停倒计时
+    function pauseStudyTimeLeft() {
+      pause(studyState)
+
+      // 嵌入总学习时长计时器暂停
+      clearInterval(totalTimer);
+
+    }
+    // 4.3.学习剩余时间重置倒计时
+    function resetStudyTimeLeft() {
+      reset(studyState, studyTimeLeftInput)
+      // 嵌入总学习时长计时器暂停
+      clearInterval(totalTimer);
+      // 嵌入学习时间进度条更新函数，将进度条重置为初始状态
+      updateCircleProgress(studyState.total, studyState.remain)
+    }
+    // 4.4用户编辑时间完成后，学习时间更新倒计时时间
+    function updateTimeLeft() {
+      // 用户编辑时先暂停倒计时，同时通过暂停倒计时器暂停总学习时长计时器
+      pauseStudyTimeLeft()
+      update(studyState, studyTimeLeftInput)
+      // 嵌入学习时间进度条更新函数，将进度条重置为初始状态
+      updateCircleProgress(studyState.total, studyState.remain)
+    }
+    // 4.5.学习倒计时事件绑定
+    // 4.5.1学习剩余时间开始倒计时
+    studyTimeLeftStart.addEventListener('click', startStudyTimeLeft);
+    // 4.5.2学习剩余时间暂停倒计时
+    studyTimeLeftPause.addEventListener('click', pauseStudyTimeLeft);
+    // 4.5.3学习剩余时间重置倒计时
+    studyTimeLeftReset.addEventListener('click', resetStudyTimeLeft);
+    // 4.5.4用户编辑学习时间，学习时间更新倒计时时间
+    studyTimeLeftInput.addEventListener('click', updateTimeLeft);
+
+    // 5.学习总时长模块
+    // 5.1总学习时长初始化显示
+    totalStudyTimeSum.innerHTML = secToMin(totalStudyTime);
+    // 5.2总学习时长计时器
+    function TotalStudyTime() {
+      totalStudyTime++;
+      localStorage.setItem('totalStudyTime', totalStudyTime)
+      totalStudyTimeSum.innerHTML = secToMin(totalStudyTime);
+    }
+    // 5.3重置按钮点击事件
+    totalStudyTimeReset.addEventListener('click', () => {
+      localStorage.setItem('totalStudyTime', 0)
+      totalStudyTime = Number(localStorage.getItem('totalStudyTime'));
+      totalStudyTimeSum.innerHTML = secToMin(totalStudyTime);
+    });
+
+    // 6.休息时长倒计时模块
+    // 6.1休息剩余时间开始倒计时
+    function startRestTimeLeft() {
+      restTimeLeft(restState, restTimeLeftInput)
+      // 嵌入停止学习时长倒计时器，同时通过停止该定时器联动停止总学习时间计时器
+      pauseStudyTimeLeft()
+
+    }
+    // 6.2.休息剩余时间暂停倒计时
+    function pauseRestTimeLeft() {
+      pause(restState)
+    }
+    // 6.3.休息剩余时间重置倒计时
+    function resetRestTimeLeft() {
+      reset(restState, restTimeLeftInput);
+      // 重置休息时间时，将进度条重置为初始状态
+      updateRestLineProgress(restState.total, restState.remain);
+    }
+    // 6.4用户编辑时间完成后，剩余时间更新倒计时时间
+    function updateRestTimeLeft() {
+      //  用户编辑时间时先暂停倒计时
+      pauseRestTimeLeft()
+      update(restState, restTimeLeftInput);
+      // 重置休息时间时，将进度条重置为初始状态
+      updateRestLineProgress(restState.total, restState.remain);
+    }
+    // 6.5.休息倒计时事件绑定
+    // 6.5.1休息剩余时间开始倒计时
+    restTimeLeftStart.addEventListener('click', startRestTimeLeft);
+    // 6.5.2休息剩余时间暂停倒计时
+    restTimeLeftPause.addEventListener('click', pauseRestTimeLeft);
+    // 6.5.3休息剩余时间重置倒计时
+    restTimeLeftReset.addEventListener('click', resetRestTimeLeft);
+    // 6.5.4用户编辑休息时间，休息时间更新倒计时时间
+    restTimeLeftInput.addEventListener('click', updateRestTimeLeft);
+
+
+
+
+  </script>
+</body>
+
+
+</html>
